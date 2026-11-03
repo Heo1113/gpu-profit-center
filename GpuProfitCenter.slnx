@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GpuProfit.Core/GpuProfit.Core.csproj" />
+    <Project Path="src/GpuProfit.Accounting/GpuProfit.Accounting.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GpuProfit.Tests/GpuProfit.Tests.csproj" />
+  </Folder>
+</Solution>
