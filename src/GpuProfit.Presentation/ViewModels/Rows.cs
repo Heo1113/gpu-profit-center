@@ -19,7 +19,7 @@ public sealed record SegmentRow(string Start, string End, string Duration, strin
 
 public sealed record GapRow(string From, string To, string Duration, string Kind, string Detail);
 
-public sealed record DeviceEnergyRow(string Gpu, string Measured, string Observed, string Coverage, string AveragePower, string MinMax, string Samples,
+public sealed record DeviceEnergyRow(string Gpu, string Measured, string Observed, string Coverage, string AveragePower, string MinMax, string MedianP95, string Samples,
     string Counter, string LongestGap);
 
 public sealed record RevenueRow(long Id, string Kind, string Amount, string Krw, string Occurred, string Provider, string Origin, string Note);

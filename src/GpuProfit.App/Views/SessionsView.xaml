@@ -153,6 +153,7 @@
                     <DataGridTextColumn Header="관측률" Binding="{Binding Coverage}" />
                     <DataGridTextColumn Header="평균 전력" Binding="{Binding AveragePower}" />
                     <DataGridTextColumn Header="최소/최대" Binding="{Binding MinMax}" />
+                    <DataGridTextColumn Header="중앙값/P95" Binding="{Binding MedianP95}" />
                     <DataGridTextColumn Header="유효/전체 샘플" Binding="{Binding Samples}" />
                     <DataGridTextColumn Header="NVML 카운터" Binding="{Binding Counter}" />
                     <DataGridTextColumn Header="최장 공백" Binding="{Binding LongestGap}" />

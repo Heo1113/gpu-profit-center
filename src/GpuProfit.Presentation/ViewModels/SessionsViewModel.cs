@@ -258,10 +258,12 @@ public sealed partial class SessionsViewModel : PageViewModel
             .Concat(gaps.Select(g => new GapRow(Fmt.Time(g.From), Fmt.Time(g.To), g.From is { } f && g.To is { } t ? Fmt.Duration((t - f).TotalSeconds) : "",
                 GapKinds.ToKorean(g.Kind), g.Detail ?? "")))
             .Take(300));
-        Replace(Devices, r.Energy.Devices.Select(d => new DeviceEnergyRow($"GPU {d.DeviceIndex}", Fmt.Wh(d.MeasuredWh), Fmt.Duration(d.ObservedSeconds),
-            Fmt.Percent(d.Coverage, 1), Fmt.Watts(d.AveragePowerW), $"{Fmt.Watts(d.MinPowerW)} / {Fmt.Watts(d.MaxPowerW)}", $"{d.ValidPowerSamples:N0} / {d.SampleCount:N0}",
-            d.CounterWh is double c ? $"{Fmt.Wh(c)}{(r.Energy.CounterDifference is double diff ? $" (적분 대비 {diff:+0.0%;-0.0%})" : "")}" : "카운터 없음",
-            d.LongestGapSeconds is double lg ? Fmt.Duration(lg) : "없음")));
+        var windows = segments.Select(g => TimeWindow.Of(g.Start, g.End ?? Context.Now)).ToList();
+        Replace(Devices, r.Energy.Devices.Select(d => (d, stats: PowerStatistics.ForDevice(samples, windows, d.DeviceIndex))).Select(x => (x.d, x.stats)).Select(t => new DeviceEnergyRow($"GPU {t.d.DeviceIndex}",
+            Fmt.Wh(t.d.MeasuredWh), Fmt.Duration(t.d.ObservedSeconds), Fmt.Percent(t.d.Coverage, 1), Fmt.Watts(t.d.AveragePowerW),
+            $"{Fmt.Watts(t.d.MinPowerW)} / {Fmt.Watts(t.d.MaxPowerW)}", $"{Fmt.Watts(t.stats.P50)} / {Fmt.Watts(t.stats.P95)}", $"{t.d.ValidPowerSamples:N0} / {t.d.SampleCount:N0}",
+            t.d.CounterWh is double c ? $"{Fmt.Wh(c)}{(r.Energy.CounterDifference is double diff ? $" (적분 대비 {diff:+0.0%;-0.0%})" : "")}" : "카운터 없음",
+            t.d.LongestGapSeconds is double lg ? Fmt.Duration(lg) : "없음")));
         Replace(EnergyComponents, r.Energy.Components.Select(c => new BreakdownRow(c.Label, Fmt.Wh(c.Wh), Fmt.Origin(c.Origin), c.Basis)));
         Replace(Summary,
         [

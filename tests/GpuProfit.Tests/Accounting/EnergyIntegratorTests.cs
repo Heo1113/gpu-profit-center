@@ -205,6 +205,16 @@ public class EnergyIntegratorTests
     }
 
     [Fact]
+    public void Power_statistics_use_only_valid_samples_inside_the_windows()
+    {
+        var samples = T.Constant(100, 0, 9).Concat(T.Constant(300, 10, 19)).Append(new PowerSample(T.Ms(5.5), 0, null)).Concat(T.Constant(999, 30, 40)).ToList();
+        var stats = PowerStatistics.ForDevice(samples, [T.Window(0, 20)], 0);
+        Assert.Equal(20, stats.Count);
+        Assert.Equal(200, stats.Mean!.Value, 9);
+        Assert.Equal(300, stats.P95!.Value, 9);
+    }
+
+    [Fact]
     public void Max_gap_must_be_positive()
         => Assert.Throws<ArgumentOutOfRangeException>(() => EnergyIntegrator.Integrate(0, [], [T.Window(0, 1)], 0));
 
