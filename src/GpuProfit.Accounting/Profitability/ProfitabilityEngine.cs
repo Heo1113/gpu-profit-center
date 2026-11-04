@@ -425,7 +425,8 @@ public static class ProfitabilityEngine
         };
     }
 
-    internal static Maybe<decimal> Sum(IEnumerable<Maybe<decimal>> values)
+    /// <summary>Sum of defined values; undefined (with the first reason) as soon as one value is undefined.</summary>
+    public static Maybe<decimal> Sum(IEnumerable<Maybe<decimal>> values)
     {
         decimal total = 0;
         foreach (var v in values)
