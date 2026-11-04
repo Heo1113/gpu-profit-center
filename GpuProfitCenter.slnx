@@ -7,6 +7,7 @@
     <Project Path="src/GpuProfit.Export/GpuProfit.Export.csproj" />
     <Project Path="src/GpuProfit.Cli/GpuProfit.Cli.csproj" />
     <Project Path="src/GpuProfit.Presentation/GpuProfit.Presentation.csproj" />
+    <Project Path="src/GpuProfit.App/GpuProfit.App.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/GpuProfit.Tests/GpuProfit.Tests.csproj" />
