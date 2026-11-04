@@ -95,9 +95,9 @@ public class ViewModelTests
 
         public void Run(int seconds)
         {
-            for (var i = 0; i < seconds; i++)
+            for (var i = 0; i < seconds; i += 5)
             {
-                Time.Advance(TimeSpan.FromSeconds(1));
+                Time.Advance(TimeSpan.FromSeconds(Math.Min(5, seconds - i)));
                 Engine.Recorder!.SampleOnce();
             }
         }
@@ -110,7 +110,7 @@ public class ViewModelTests
         }
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Every_page_activates_on_an_empty_database_with_empty_state_texts()
     {
         await using var h = new Harness();
@@ -130,7 +130,7 @@ public class ViewModelTests
         Assert.NotEmpty(h.Main.History.EmptyText);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Record_account_compare_and_export_through_the_view_models()
     {
         await using var h = new Harness();
@@ -275,7 +275,7 @@ public class ViewModelTests
         Assert.DoesNotContain(h.Main.Pages, page => page.StatusText.StartsWith("오류", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Input_errors_are_reported_not_thrown()
     {
         await using var h = new Harness();
@@ -310,7 +310,7 @@ public class ViewModelTests
         Assert.Contains("가동률", sc.StatusText);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Cancelled_confirmation_changes_nothing()
     {
         await using var h = new Harness();
@@ -327,7 +327,7 @@ public class ViewModelTests
         Assert.Single(h.Engine.Store.ListSessions(new SessionQuery()));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Demo_data_is_flagged_and_shown()
     {
         await using var h = new Harness();

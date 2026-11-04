@@ -195,16 +195,19 @@ public sealed partial class SessionsViewModel : PageViewModel
                     Fmt.ShortTime(s.Started), s.IsOpen ? "기록 중" : Fmt.Hours(r?.BasisHours), s.IsOpen ? "-" : Fmt.Kwh(r?.TotalKwh),
                     s.IsOpen ? "-" : r?.RealizedNet is decimal n ? Fmt.SignedKrw(Maybe<decimal>.Of(n)) : Fmt.NA, string.Join(", ", flags), s.IsOpen, s.IsMock);
             }));
+
+            // Selected inside the loading block: the detail is loaded once, below, not again by the selection change.
+            SelectedSession = Sessions.FirstOrDefault(s => s.Id == keep) ?? Sessions.FirstOrDefault();
         }
         finally
         {
             _loading = false;
         }
 
+        HasSelection = SelectedSession is not null;
         EmptyText = Sessions.Count > 0 ? ""
             : Workloads.Count == 0 ? "작업이 없습니다. 왼쪽에서 작업을 만든 뒤 세션을 시작하거나 직접 입력하세요."
             : "조건에 맞는 세션이 없습니다.";
-        SelectedSession = Sessions.FirstOrDefault(s => s.Id == keep) ?? (keep is null ? Sessions.FirstOrDefault() : null) ?? Sessions.FirstOrDefault();
         StatusText = $"세션 {Sessions.Count}개";
         if (SelectedSession is { } sel)
         {

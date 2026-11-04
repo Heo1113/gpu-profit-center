@@ -28,7 +28,8 @@ public class EngineAndSessionTests
         return (engine, time, gpus);
     }
 
-    private static void Run(ProfitEngine engine, ManualTime time, int seconds, int step = 1)
+    // 5 s steps (under the 10 s max gap): every stored sample is an fsync with synchronous=FULL, slow on CI disks.
+    private static void Run(ProfitEngine engine, ManualTime time, int seconds, int step = 5)
     {
         for (var i = 0; i < seconds; i += step)
         {
@@ -37,7 +38,7 @@ public class EngineAndSessionTests
         }
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Session_lifecycle_with_pause_measures_only_recorded_time()
     {
         using var dir = new TempDir();
@@ -66,7 +67,7 @@ public class EngineAndSessionTests
         Assert.Single(engine.Store.ListResults(s.Id)); // saved on stop
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Only_one_running_session_per_gpu()
     {
         using var dir = new TempDir();
@@ -80,7 +81,7 @@ public class EngineAndSessionTests
         Assert.Throws<InvalidOperationException>(() => engine.Sessions.Start(w, "GPU1 again", null, [1]));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Multiple_gpus_are_accounted_separately_and_summed()
     {
         using var dir = new TempDir();
@@ -98,7 +99,7 @@ public class EngineAndSessionTests
         Assert.Equal(3, engine.Store.ListDevices().Count);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Selected_gpus_only()
     {
         using var dir = new TempDir();
@@ -113,7 +114,7 @@ public class EngineAndSessionTests
         Assert.Equal([1], r.Energy.Devices.Select(d => d.DeviceIndex));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Sensor_failures_and_lost_gpu_become_unobserved_time_and_gaps()
     {
         using var dir = new TempDir();
@@ -140,7 +141,7 @@ public class EngineAndSessionTests
         Assert.Contains(r.Warnings, w2 => w2.Contains("MOCK"));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task No_gpu_at_all_keeps_the_app_running_and_energy_undefined()
     {
         using var dir = new TempDir();
@@ -163,7 +164,7 @@ public class EngineAndSessionTests
         Assert.Equal(61, engine.Store.GetStats().SystemSamples);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Sleep_and_long_sample_gaps_are_not_interpolated()
     {
         using var dir = new TempDir();
@@ -190,7 +191,7 @@ public class EngineAndSessionTests
         Assert.Contains(GapKinds.SampleGap, kinds);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Wall_clock_jump_is_recorded()
     {
         using var dir = new TempDir();
@@ -203,7 +204,7 @@ public class EngineAndSessionTests
         Assert.Contains(engine.Store.ListGaps(), g => g.Kind == GapKinds.ClockJump);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Unclean_end_is_recovered_on_the_next_start_and_the_session_can_be_resumed()
     {
         using var dir = new TempDir();
@@ -239,7 +240,7 @@ public class EngineAndSessionTests
         Assert.Equal(150, r.Energy.GpuMeasuredWh, 2);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Normal_exit_pauses_running_sessions_and_ends_the_run()
     {
         using var dir = new TempDir();
@@ -262,7 +263,7 @@ public class EngineAndSessionTests
         Assert.Equal(SegmentEndReasons.AppExit, Assert.Single(again.Store.ListSegments(id)).EndReason);
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Mock_session_cannot_be_resumed_with_real_sensors()
     {
         using var dir = new TempDir();
@@ -281,7 +282,7 @@ public class EngineAndSessionTests
         Assert.Throws<InvalidOperationException>(() => engine2.Sessions.Resume(id));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Recalculation_after_a_tariff_change_adds_a_new_result_and_keeps_the_old_one()
     {
         using var dir = new TempDir();
@@ -306,7 +307,7 @@ public class EngineAndSessionTests
         Assert.Equal(90m, Math.Round(Assert.Single(latest).Summary.ElectricityCost!.Value, 4));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Manual_session_with_wall_meter_and_editing_rules()
     {
         using var dir = new TempDir();
@@ -333,7 +334,7 @@ public class EngineAndSessionTests
         Assert.Null(engine.Store.GetSession(s.Id));
     }
 
-    [Fact]
+    [Fact(Timeout = 120_000)]
     public async Task Data_folder_lock_allows_one_process()
     {
         using var dir = new TempDir();

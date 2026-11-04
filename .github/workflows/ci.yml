@@ -38,6 +38,7 @@ jobs:
         run: dotnet build GpuProfitCenter.slnx -c Release
 
       - name: Test
+        timeout-minutes: 10
         run: dotnet test --project tests/GpuProfit.Tests -c Release --no-build
 
   windows:
@@ -57,6 +58,7 @@ jobs:
         run: dotnet build GpuProfitCenter.slnx -c Release
 
       - name: Test
+        timeout-minutes: 15
         run: dotnet test --project tests/GpuProfit.Tests -c Release --no-build --report-xunit-trx --results-directory TestResults
 
       - name: CLI smoke test (demo data, exports, backup, verification)
