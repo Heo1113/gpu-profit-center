@@ -50,7 +50,7 @@ public sealed class ViewContext
     }
 }
 
-/// <summary>Base of the eight screens. Busy/LoadOnce copied from project C's PageViewModel (commit 06cc9e5).</summary>
+/// <summary>Base of the eight screens. Busy adapted from project C's PageViewModel (commit 06cc9e5).</summary>
 public abstract partial class PageViewModel(ViewContext context) : ObservableObject
 {
     protected ViewContext Context { get; } = context;
@@ -74,7 +74,9 @@ public abstract partial class PageViewModel(ViewContext context) : ObservableObj
     {
     }
 
-    private static readonly AsyncLocal<bool> InsideBusy = new();
+    // The page whose work is running in this async flow. Per page: work of one page never skips another page's gate
+    // (project C kept a single flag for all pages, which let a refresh triggered from another page run unserialized).
+    private static readonly AsyncLocal<PageViewModel?> BusyOwner = new();
     private readonly SemaphoreSlim _busyGate = new(1, 1);
 
     /// <summary>
@@ -83,14 +85,15 @@ public abstract partial class PageViewModel(ViewContext context) : ObservableObj
     /// </summary>
     protected async Task Busy(Func<Task> work)
     {
-        if (InsideBusy.Value)
+        if (ReferenceEquals(BusyOwner.Value, this))
         {
             await work();
             return;
         }
 
         await _busyGate.WaitAsync();
-        InsideBusy.Value = true;
+        var previous = BusyOwner.Value;
+        BusyOwner.Value = this;
         IsBusy = true;
         try
         {
@@ -104,7 +107,7 @@ public abstract partial class PageViewModel(ViewContext context) : ObservableObj
         finally
         {
             IsBusy = false;
-            InsideBusy.Value = false;
+            BusyOwner.Value = previous;
             _busyGate.Release();
         }
     }
