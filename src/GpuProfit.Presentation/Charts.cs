@@ -13,6 +13,39 @@ public static class Charts
 
     public static double Days(double seconds) => seconds / 86400.0;
 
+    /// <summary>
+    /// Gives a chart without fixed limits a minimum vertical span, so that a sensor that moves in whole units (a GPU
+    /// temperature flipping between 30 and 31 °C) is not stretched into full-height steps.
+    /// </summary>
+    public static ChartModel WithMinimumSpan(ChartModel model, double span)
+    {
+        if (model.YMin is not null || model.YMax is not null || model.IsEmpty || !(span > 0))
+        {
+            return model;
+        }
+
+        var values = model.Series.SelectMany(s => s.Y).Where(double.IsFinite).ToList();
+        if (values.Count == 0)
+        {
+            return model;
+        }
+
+        var min = values.Min();
+        var max = values.Max();
+        if (max - min >= span)
+        {
+            return model;
+        }
+
+        var bottom = (min + max) / 2 - span / 2;
+        if (min >= 0 && bottom < 0)
+        {
+            bottom = 0;
+        }
+
+        return model with { YMin = Math.Floor(bottom), YMax = Math.Floor(bottom) + span };
+    }
+
     public static ChartModel Live(string title, string unit, IReadOnlyList<HardwareSnapshot> snapshots, Func<GpuSample, double?> value, double gapSeconds,
         string format = "0.0", double? yMin = null, double? yMax = null)
     {

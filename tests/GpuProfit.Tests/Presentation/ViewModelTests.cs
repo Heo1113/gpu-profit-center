@@ -340,4 +340,26 @@ public class ViewModelTests
         await h.Main.Sessions.OnActivatedAsync();
         Assert.All(h.Main.Sessions.Sessions, s => Assert.True(s.IsMock));
     }
+
+    [Fact]
+    public void Narrow_sensor_ranges_get_a_minimum_vertical_span()
+    {
+        // A temperature flipping between 30 and 31 °C (seen on a real RTX 5080 at idle) must not fill the whole chart height.
+        var flat = new LocalAiPerf.Presentation.Charts.ChartModel
+        {
+            Title = "GPU 온도", Unit = "°C",
+            Series = [new LocalAiPerf.Presentation.Charts.ChartSeries("GPU", [1, 2, 3, 4], [30, 31, 30, 31], "#3987e5")],
+        };
+        var widened = Charts.WithMinimumSpan(flat, 10);
+        Assert.Equal(25, widened.YMin);
+        Assert.Equal(35, widened.YMax);
+
+        var low = Charts.WithMinimumSpan(flat with { Series = [new("GPU", [1, 2], [1, 2], "#3987e5")] }, 10);
+        Assert.Equal(0, low.YMin); // never below zero for non-negative data
+
+        var wide = flat with { Series = [new("GPU", [1, 2], [30, 70], "#3987e5")] };
+        Assert.Null(Charts.WithMinimumSpan(wide, 10).YMin); // a real change keeps the automatic scale
+        var fixedAxis = flat with { YMin = 0, YMax = 100 };
+        Assert.Equal(100, Charts.WithMinimumSpan(fixedAxis, 10).YMax);
+    }
 }

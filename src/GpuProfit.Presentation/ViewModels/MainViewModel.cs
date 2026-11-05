@@ -288,7 +288,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
             IsRecording = open.Count > 0;
             RecordingText = open.Count == 0 ? "기록 중인 세션 없음" : $"기록 중: {string.Join(", ", open.Select(s => $"#{s.Id} {s.Title}".Trim()))}";
             var stats = _context.Store.GetStats();
-            DatabaseText = $"DB {stats.FileBytes / (1024.0 * 1024):0.0} MB · 세션 {stats.Sessions} · 샘플 {stats.GpuSamples:N0}{(_context.Paths.IsPortable ? " · 포터블" : "")}";
+            DatabaseText = $"DB {(stats.FileBytes + stats.WalBytes) / (1024.0 * 1024):0.0} MB · 세션 {stats.Sessions} · 샘플 {stats.GpuSamples:N0}{(_context.Paths.IsPortable ? " · 포터블" : "")}";
             HasDemoData = DemoDataSeeder.HasDemoData(_context.Store);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)

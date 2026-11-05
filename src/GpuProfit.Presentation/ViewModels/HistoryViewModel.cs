@@ -129,7 +129,7 @@ public sealed partial class HistoryViewModel : PageViewModel
         var (gpu, gaps) = await Task.Run(() => (Context.Store.QueryGpuSeries(from, to, bucket, mock), Context.Store.ListGaps(from, to, 300)));
         PowerChart = Charts.GpuHistory("GPU 보드 전력 (평균)", "W", gpu, p => p.PowerW, bucket);
         PowerPeakChart = Charts.GpuHistory("GPU 보드 전력 (구간 최대)", "W", gpu, p => p.PowerMaxW, bucket);
-        TempChart = Charts.GpuHistory("GPU 온도 (평균)", "°C", gpu, p => p.TemperatureC, bucket, "0");
+        TempChart = Charts.WithMinimumSpan(Charts.GpuHistory("GPU 온도 (평균)", "°C", gpu, p => p.TemperatureC, bucket, "0"), 10);
         UtilChart = Charts.GpuHistory("GPU 사용률 (평균)", "%", gpu, p => p.Utilization, bucket, "0");
         SeriesNote = $"{bucket.TotalMinutes:0}분 단위 평균. 기록이 없는 구간은 선을 잇지 않습니다." + (mock is null ? " (MOCK 값 포함)" : " (실제 센서 값만)");
         Replace(Gaps, gaps.Select(g => new GapRow(Fmt.Time(g.From ?? g.Detected), Fmt.Time(g.To), g.From is { } f && g.To is { } t ? Fmt.Duration((t - f).TotalSeconds) : "",

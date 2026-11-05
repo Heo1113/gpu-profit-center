@@ -71,9 +71,11 @@ public sealed partial class HardwareViewModel : PageViewModel
 
         Replace(Info, rows);
         Replace(Capabilities, hw.Capabilities.Select(c => new CapabilityRow(c.DisplayName, c.Source, SensorStatusText.ToKorean(c.Status), c.Detail ?? "")));
-        var interval = Context.Settings.Sampling.IntervalSeconds;
-        SamplingText = $"샘플 간격 {interval}초 · 최대 샘플 간격 {Context.Engine.Profile.MaxSampleGapSeconds:0.#}초를 넘는 구간은 공백으로 둡니다 · 저장된 샘플 {Context.Engine.Recorder?.SamplesStored:N0}개(이번 실행)";
+        UpdateSamplingText();
     }
+
+    private void UpdateSamplingText() => SamplingText =
+        $"샘플 간격 {Context.Settings.Sampling.IntervalSeconds}초 · 최대 샘플 간격 {Context.Engine.Profile.MaxSampleGapSeconds:0.#}초를 넘는 구간은 공백으로 둡니다 · 저장된 샘플 {Context.Engine.Recorder?.SamplesStored:N0}개(이번 실행)";
 
     public override void OnSensor(HardwareSnapshot snapshot)
     {
@@ -108,6 +110,7 @@ public sealed partial class HardwareViewModel : PageViewModel
         }
 
         Replace(Current, rows);
+        UpdateSamplingText();
         if (snapshot.Timestamp - _lastCharts >= TimeSpan.FromSeconds(2))
         {
             RefreshCharts();
@@ -133,7 +136,7 @@ public sealed partial class HardwareViewModel : PageViewModel
         var gap = Math.Max(Context.Engine.Profile.MaxSampleGapSeconds, recorder.Interval.TotalSeconds * 3);
         PowerChart = Charts.Live("GPU 보드 전력", "W", s, g => g.PowerW, gap, yMin: 0);
         UtilChart = Charts.Live("GPU 사용률", "%", s, g => g.UtilizationPercent, gap, "0", 0, 100);
-        TempChart = Charts.Live("GPU 온도", "°C", s, g => g.TemperatureC, gap, "0");
+        TempChart = Charts.WithMinimumSpan(Charts.Live("GPU 온도", "°C", s, g => g.TemperatureC, gap, "0"), 10);
         VramChart = Charts.Live("VRAM 사용량", "GiB", s, g => g.MemoryUsedBytes / (1024.0 * 1024 * 1024), gap, "0.00", yMin: 0);
         ClockChart = Charts.Live("GPU 코어 클럭", "MHz", s, g => g.GraphicsClockMhz, gap, "0");
         CpuChart = Charts.LiveSystem("CPU 사용률", "%", s, x => x.CpuUtilizationPercent, gap, 100);
