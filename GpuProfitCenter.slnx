@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GpuProfit.Core/GpuProfit.Core.csproj" />
+    <Project Path="src/GpuProfit.Accounting/GpuProfit.Accounting.csproj" />
+    <Project Path="src/GpuProfit.Storage/GpuProfit.Storage.csproj" />
+    <Project Path="src/GpuProfit.Recording/GpuProfit.Recording.csproj" />
+    <Project Path="src/GpuProfit.Export/GpuProfit.Export.csproj" />
+    <Project Path="src/GpuProfit.Cli/GpuProfit.Cli.csproj" />
+    <Project Path="src/GpuProfit.Presentation/GpuProfit.Presentation.csproj" />
+    <Project Path="src/GpuProfit.App/GpuProfit.App.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GpuProfit.Tests/GpuProfit.Tests.csproj" />
+  </Folder>
+</Solution>
