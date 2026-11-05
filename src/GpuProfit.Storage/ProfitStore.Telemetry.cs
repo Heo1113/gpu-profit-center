@@ -121,10 +121,29 @@ public sealed partial class ProfitStore
     /// Stores one snapshot (system values and every GPU) in one transaction. A snapshot whose time is already stored is
     /// ignored (no duplicates). Returns false when nothing new was written.
     /// </summary>
-    public bool WriteSnapshot(long runId, HardwareSnapshot snapshot)
+    public bool WriteSnapshot(long runId, HardwareSnapshot snapshot) => WriteTx((c, tx) => InsertSnapshot(c, tx, runId, snapshot));
+
+    /// <summary>
+    /// Stores many snapshots in one transaction (one disk sync instead of one per sample), for imported or generated
+    /// data. Returns how many snapshots added new rows.
+    /// </summary>
+    public int WriteSnapshots(long runId, IEnumerable<HardwareSnapshot> snapshots) => WriteTx((c, tx) =>
+    {
+        var written = 0;
+        foreach (var snapshot in snapshots)
+        {
+            if (InsertSnapshot(c, tx, runId, snapshot))
+            {
+                written++;
+            }
+        }
+
+        return written;
+    });
+
+    private bool InsertSnapshot(SqliteConnection c, SqliteTransaction tx, long runId, HardwareSnapshot snapshot)
     {
         var t = snapshot.Timestamp.ToUnixTimeMilliseconds();
-        return WriteTx((c, tx) =>
         {
             var written = Execute(c, """
                 INSERT OR IGNORE INTO system_samples (t_ms, run_id, is_mock, cpu, ram_used, ram_total) VALUES (@t, @r, @m, @c, @u, @tot);
@@ -148,7 +167,7 @@ public sealed partial class ProfitStore
 
             Execute(c, "UPDATE app_runs SET heartbeat_ms = MAX(COALESCE(heartbeat_ms, 0), @t) WHERE id = @id AND ended_ms IS NULL;", tx, ("@t", t), ("@id", runId));
             return written > 0;
-        });
+        }
     }
 
     private static double? Finite(double? value) => value is double v && double.IsFinite(v) ? v : null;

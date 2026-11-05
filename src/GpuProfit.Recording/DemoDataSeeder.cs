@@ -46,6 +46,7 @@ public static class DemoDataSeeder
         {
             var start = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero).AddDays(-p.DaysAgo).AddHours(p.StartHour);
             var end = start.AddHours(p.Hours);
+            var batch = new List<HardwareSnapshot>();
             for (var t = start.AddSeconds(-5); t <= end.AddSeconds(5); t = t.AddSeconds(5))
             {
                 if (p.Gap && t > start.AddMinutes(70) && t < start.AddMinutes(85))
@@ -54,7 +55,7 @@ public static class DemoDataSeeder
                 }
 
                 var w = p.BaseW + 25 * Math.Sin((t - start).TotalMinutes / 9) + random.NextDouble() * 8;
-                store.WriteSnapshot(run, new HardwareSnapshot
+                batch.Add(new HardwareSnapshot
                 {
                     Timestamp = t,
                     IsMock = true,
@@ -68,6 +69,7 @@ public static class DemoDataSeeder
                 });
             }
 
+            store.WriteSnapshots(run, batch); // one transaction per session: one disk sync, not thousands
             var id = store.CreateSession(new WorkSession
             {
                 WorkloadId = p.Workload,
