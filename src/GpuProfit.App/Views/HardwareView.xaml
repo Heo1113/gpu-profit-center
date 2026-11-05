@@ -52,19 +52,24 @@
                   <DataGridTextColumn Header="참고" Binding="{Binding Note}" ElementStyle="{StaticResource WrapCell}" Width="*" />
                 </DataGrid.Columns>
               </DataGrid>
-              <TextBlock Text="센서 지원 상태" Style="{StaticResource SectionTitle}" Margin="0,12,0,8" />
+
+            </StackPanel>
+          </Border>
+        </Grid>
+        <Border Style="{StaticResource Card}">
+          <StackPanel>
+            <TextBlock Text="센서 지원 상태" Style="{StaticResource SectionTitle}" />
               <DataGrid ItemsSource="{Binding Capabilities}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" CanUserAddRows="False"
                         AutomationProperties.Name="센서 지원 상태">
                 <DataGrid.Columns>
                   <DataGridTextColumn Header="지표" Binding="{Binding Metric}" />
                   <DataGridTextColumn Header="출처" Binding="{Binding Source}" />
                   <DataGridTextColumn Header="상태" Binding="{Binding Status}" />
-                  <DataGridTextColumn Header="설명" Binding="{Binding Detail}" Width="*" ElementStyle="{StaticResource WrapCell}" />
+                  <DataGridTextColumn Header="설명" Binding="{Binding Detail}" Width="*" MinWidth="300" ElementStyle="{StaticResource WrapCell}" />
                 </DataGrid.Columns>
               </DataGrid>
-            </StackPanel>
-          </Border>
-        </Grid>
+          </StackPanel>
+        </Border>
       </StackPanel>
     </ScrollViewer>
   </DockPanel>

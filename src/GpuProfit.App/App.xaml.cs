@@ -32,6 +32,7 @@ public partial class App : Application, IAppHost
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        WheelForwarding.Register();
         Options = StartupOptions.Parse(e.Args);
         try
         {
